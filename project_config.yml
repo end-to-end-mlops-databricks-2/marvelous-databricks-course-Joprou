@@ -1,5 +1,5 @@
-catalog_name: mlops_prod
-schema_name: hotel_reservations
+catalog_name: mlops_dev
+schema_name: changshe
 
 parameters:
   learning_rate: 0.01
