@@ -1,12 +1,12 @@
 # Databricks notebook source
 
-import pandas as pd
 import logging
+
+import pandas as pd
+from pyspark.sql import SparkSession
 
 from hotel_reservations.config import ProjectConfig
 from hotel_reservations.data_processor import DataProcessor
-from pyspark.sql import SparkSession
-
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

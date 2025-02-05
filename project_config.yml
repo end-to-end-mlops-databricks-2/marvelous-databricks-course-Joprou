@@ -11,7 +11,7 @@ drop_cols:
   - arrival_year
 
 num_features:
-  - no_of_adults 
+  - no_of_adults
   - no_of_children
   - no_of_weekend_nights
   - no_of_week_nights
