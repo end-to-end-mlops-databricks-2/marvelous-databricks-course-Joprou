@@ -29,6 +29,5 @@ cat_features:
   - repeated_guest
   - arrival_month
   - arrival_date
-  - booking_status
 
 target: booking_status
