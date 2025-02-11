@@ -1,6 +1,5 @@
 # Databricks notebook source
 
-import os
 import mlflow
 from pyspark.sql import SparkSession
 from hotel_reservations.config import ProjectConfig, Tags
@@ -24,3 +23,4 @@ basic_model.evaluate_model()
 # COMMAND ----------
 basic_model.log_model()
 # COMMAND ----------
+basic_model.register_model()

@@ -1,4 +1,5 @@
 import mlflow
+from mlflow import MlflowClient
 from mlflow.models import infer_signature
 from loguru import logger
 from pyspark.sql import SparkSession
@@ -6,7 +7,7 @@ from pyspark.sql import SparkSession
 from lightgbm import LGBMClassifier
 from sklearn.metrics import accuracy_score, f1_score, recall_score, precision_score
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 
 from hotel_reservations.config import ProjectConfig, Tags
@@ -126,3 +127,25 @@ class BasicModel:
             )
 
             logger.info("Model logged successfully.")
+
+    def register_model(self):
+        logger.info("Registering model in Unity Catalog....")
+
+        uc_model_name = f"{self.catalog_name}.{self.schema_name}.hotel_reservations_model_basic"
+
+        registered_model = mlflow.register_model(
+            model_uri=f"runs:/{self.run_id}/lightgbm-pipeline-model",
+            name=uc_model_name,
+            # tags=self.tags,
+        )
+
+        latest_version = registered_model.version
+
+        logger.info(f"Model registered as version {latest_version}.")
+
+        client = MlflowClient()
+        client.set_registered_model_alias(
+            name=uc_model_name, alias="latest-model", version=latest_version
+        )
+
+        logger.info(f"`latest-model` tag is added to model version {latest_version}.")
