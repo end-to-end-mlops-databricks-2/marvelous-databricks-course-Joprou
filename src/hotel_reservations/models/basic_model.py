@@ -6,25 +6,19 @@ from loguru import logger
 from pyspark.sql import SparkSession
 
 from lightgbm import LGBMClassifier
-from sklearn.metrics import accuracy_score, f1_score, recall_score, precision_score
+
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 
 from hotel_reservations.config import ProjectConfig, Tags
+from hotel_reservations.models._base import AbstractModel
 
 
-class BasicModel:
+class BasicModel(AbstractModel):
     def __init__(self, config: ProjectConfig, tags: Tags, spark: SparkSession):
-        self.catalog_name = config.catalog_name
-        self.schema_name = config.schema_name
-        self.cat_features = config.cat_features
-        self.num_features = config.num_features
-        self.target = config.target
-        self.config = config
-        self.tags = tags.model_dump()
-        self.spark = spark
-        self.model_parameters = config.parameters
+        super().__init__(config=config, tags=tags, spark=spark)
+
         self.experiment_name = config.experiment_name
 
     def load_data(self):
@@ -69,33 +63,6 @@ class BasicModel:
         self.pipeline.fit(self.X_train, self.y_train)
         logger.info("Model trained successfully.")
 
-    def evaluate_model(self):
-        y_pred = self.pipeline.predict(self.X_test)
-
-        # Evaluate
-        accuracy = accuracy_score(self.y_test, y_pred)
-        f1 = f1_score(self.y_test, y_pred, pos_label="Canceled")
-        recall = recall_score(self.y_test, y_pred, pos_label="Canceled")
-        precision = precision_score(self.y_test, y_pred, pos_label="Canceled")
-
-        logger.info(f"Accuracy: {accuracy}")
-        logger.info(f"F1: {f1}")
-        logger.info(f"Recall: {recall}")
-        logger.info(f"Precision: {precision}")
-
-        self.metrics = {
-            "accuracy": accuracy,
-            "f1": f1,
-            "recall": recall,
-            "precision": precision,
-        }
-
-    def _log_metrics(self):
-        logger.info("Logging metrics to MLflow...")
-        for metric_name, metric_value in self.metrics.items():
-            mlflow.log_metric(metric_name, metric_value)
-        logger.info("Metrics logged successfully.")
-
     def log_model(self):
         logger.info("Logging experiments to MLflow...")
         mlflow.set_experiment(self.experiment_name)
@@ -107,7 +74,7 @@ class BasicModel:
             # Log parameters and metrics
             mlflow.log_param("model_type", "LGBMClassifier")
             mlflow.log_params(self.model_parameters)
-            self._log_metrics()
+            self._log_metrics(self.evaluate_model(y_pred, self.y_test))
 
             # Log dataset
             logger.info("Logging dataset to MLflow...")
@@ -160,20 +127,3 @@ class BasicModel:
         logger.info("Model loaded succesfully.")
 
         return model.predict(input_data)
-
-    def _get_run_by_id(self, run_id: str = None):
-        run_id = run_id or self.run_id
-        return mlflow.get_run(run_id)
-
-    def retrieve_current_run_datatset(self):
-        run = self._get_run_by_id(self.run_id)
-        dataset_info = run.inputs.dataset_inputs[0].dataset
-        dataset_source = mlflow.data.get_source(dataset_info)
-        return dataset_source.load()
-
-    def retrieve_current_run_metadata(self):
-        run = self._get_run_by_id(self.run_id)
-        data_dict = run.data.to_dictionary()
-        metrics = data_dict["metrics"]
-        params = data_dict["params"]
-        return metrics, params
