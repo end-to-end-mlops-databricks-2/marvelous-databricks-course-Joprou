@@ -1,5 +1,8 @@
 # Databricks notebook source
 
+# %reload_ext autoreload
+# %autoreload 2
+
 import mlflow
 from pyspark.sql import SparkSession
 from hotel_reservations.config import ProjectConfig, Tags
@@ -22,5 +25,21 @@ basic_model.train_model()
 basic_model.evaluate_model()
 # COMMAND ----------
 basic_model.log_model()
+
+# COMMAND ----------
+# Retrieve dataset for the current run
+basic_model.retrieve_current_run_dataset()
+
+# COMMAND ----------
+# Retrieve metadata for the current run
+basic_model.retrieve_current_run_metadata()
+
 # COMMAND ----------
 basic_model.register_model()
+
+# COMMAND ----------
+test_set = spark.table(f"{config.catalog_name}.{config.schema_name}.test_set").limit(10)
+
+X_test = test_set.drop(config.target).toPandas()
+
+# COMMAND ----------

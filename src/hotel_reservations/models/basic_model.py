@@ -1,4 +1,5 @@
 import mlflow
+import pandas as pd
 from mlflow import MlflowClient
 from mlflow.models import infer_signature
 from loguru import logger
@@ -21,7 +22,7 @@ class BasicModel:
         self.num_features = config.num_features
         self.target = config.target
         self.config = config
-        self.tags = tags
+        self.tags = tags.model_dump()
         self.spark = spark
         self.model_parameters = config.parameters
         self.experiment_name = config.experiment_name
@@ -121,7 +122,6 @@ class BasicModel:
             # Log model
             logger.info("Logging model to MLflow...")
             signature = infer_signature(model_input=self.X_train, model_output=y_pred)
-            logger.info(f"Signature: {signature}")
             mlflow.sklearn.log_model(
                 sk_model=self.pipeline, signature=signature, artifact_path="lightgbm-pipeline-model"
             )
@@ -136,7 +136,7 @@ class BasicModel:
         registered_model = mlflow.register_model(
             model_uri=f"runs:/{self.run_id}/lightgbm-pipeline-model",
             name=uc_model_name,
-            # tags=self.tags,
+            tags=self.tags,
         )
 
         latest_version = registered_model.version
@@ -149,3 +149,31 @@ class BasicModel:
         )
 
         logger.info(f"`latest-model` tag is added to model version {latest_version}.")
+
+    def load_latest_model_and_predict(
+        self, input_data: pd.DataFrame, model_name: str = "hotel_reservations_model_basic"
+    ):
+
+        logger.info("Loading model...")
+        model_uri = f"models:/{self.catalog_name}.{self.schema_name}.{model_name}@latest-model"
+        model = mlflow.sklearn.load_model(model_uri)
+        logger.info("Model loaded succesfully.")
+
+        return model.predict(input_data)
+
+    def _get_run_by_id(self, run_id: str = None):
+        run_id = run_id or self.run_id
+        return mlflow.get_run(run_id)
+
+    def retrieve_current_run_datatset(self):
+        run = self._get_run_by_id(self.run_id)
+        dataset_info = run.inputs.dataset_inputs[0].dataset
+        dataset_source = mlflow.data.get_source(dataset_info)
+        return dataset_source.load()
+
+    def retrieve_current_run_metadata(self):
+        run = self._get_run_by_id(self.run_id)
+        data_dict = run.data.to_dictionary()
+        metrics = data_dict["metrics"]
+        params = data_dict["params"]
+        return metrics, params
