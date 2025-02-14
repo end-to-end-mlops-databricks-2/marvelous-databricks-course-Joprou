@@ -22,7 +22,6 @@ basic_model.load_data()
 basic_model.prepare_model_pipeline()
 # COMMAND ----------
 basic_model.train_model()
-basic_model.evaluate_model()
 # COMMAND ----------
 basic_model.log_model()
 
@@ -41,5 +40,6 @@ basic_model.register_model()
 test_set = spark.table(f"{config.catalog_name}.{config.schema_name}.test_set").limit(10)
 
 X_test = test_set.drop(config.target).toPandas()
+predictions_df = basic_model.load_latest_model_and_predict(X_test)
 
 # COMMAND ----------
