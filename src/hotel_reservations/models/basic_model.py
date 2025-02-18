@@ -1,15 +1,13 @@
 import mlflow
 import pandas as pd
+from lightgbm import LGBMClassifier
+from loguru import logger
 from mlflow import MlflowClient
 from mlflow.models import infer_signature
-from loguru import logger
 from pyspark.sql import SparkSession
-
-from lightgbm import LGBMClassifier
-
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from hotel_reservations.config import ProjectConfig, Tags
 from hotel_reservations.models._base import AbstractModel
@@ -26,9 +24,7 @@ class BasicModel(AbstractModel):
         logger.info("Loading data from Databricks...")
         self.train_set_spark = self.spark.table(f"{self.catalog_name}.{self.schema_name}.train_set")
         self.train_set = self.train_set_spark.toPandas()
-        self.test_set = self.spark.table(
-            f"{self.catalog_name}.{self.schema_name}.test_set"
-        ).toPandas()
+        self.test_set = self.spark.table(f"{self.catalog_name}.{self.schema_name}.test_set").toPandas()
         self.data_version = "0"
 
         self.X_train = self.train_set[self.config.num_features + self.config.cat_features]
@@ -111,16 +107,13 @@ class BasicModel(AbstractModel):
         logger.info(f"Model registered as version {latest_version}.")
 
         client = MlflowClient()
-        client.set_registered_model_alias(
-            name=uc_model_name, alias="latest-model", version=latest_version
-        )
+        client.set_registered_model_alias(name=uc_model_name, alias="latest-model", version=latest_version)
 
         logger.info(f"`latest-model` tag is added to model version {latest_version}.")
 
     def load_latest_model_and_predict(
         self, input_data: pd.DataFrame, model_name: str = "hotel_reservations_model_basic"
     ):
-
         logger.info("Loading model...")
         model_uri = f"models:/{self.catalog_name}.{self.schema_name}.{model_name}@latest-model"
         model = mlflow.sklearn.load_model(model_uri)
