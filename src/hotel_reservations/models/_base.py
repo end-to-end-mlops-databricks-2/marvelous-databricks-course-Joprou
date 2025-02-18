@@ -1,8 +1,8 @@
 import mlflow
-
 from loguru import logger
 from pyspark.sql import SparkSession
-from sklearn.metrics import accuracy_score, f1_score, recall_score, precision_score
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+
 from hotel_reservations.config import ProjectConfig, Tags
 
 
