@@ -1,5 +1,8 @@
 # Databricks notebook source
+# %pip install hotel_reservations-0.0.1-py3-none-any.whl
+# dbutils.library.restartPython()
 
+# COMMAND ----------
 # %reload_ext autoreload
 # %autoreload 2
 
