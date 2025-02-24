@@ -21,9 +21,6 @@ class DataProcessor:
         cat_cols = self.config.cat_features
         num_cols = self.config.num_features
 
-        # Drop columns
-        self.df.drop(self.config.drop_cols, axis=1, inplace=True)
-
         self.df[cat_cols] = self.df[cat_cols].astype("category")
         self.df[num_cols] = self.df[num_cols].apply(pd.to_numeric, errors="coerce")
 
