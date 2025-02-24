@@ -7,10 +7,6 @@ parameters:
   n_estimators: 1000
   max_depth: 6
 
-drop_cols:
-  - Booking_ID
-  - arrival_year
-
 num_features:
   - no_of_adults
   - no_of_children
