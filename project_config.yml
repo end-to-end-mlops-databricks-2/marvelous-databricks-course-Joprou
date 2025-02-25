@@ -1,6 +1,7 @@
 catalog_name: mlops_dev
 schema_name: changshe
 experiment_name: /Shared/hotel_reservations_basic
+experiment_name_fe: /Shared/hotel-reservations-fe
 
 parameters:
   learning_rate: 0.01
