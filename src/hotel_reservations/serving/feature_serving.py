@@ -3,8 +3,7 @@
 from databricks.feature_engineering import FeatureEngineeringClient, FeatureLookup
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.catalog import OnlineTableSpec, OnlineTableSpecTriggeredSchedulingPolicy
-from databricks.sdk.service.serving import ServedEntityInput, EndpointCoreConfigInput
-
+from databricks.sdk.service.serving import EndpointCoreConfigInput, ServedEntityInput
 from loguru import logger
 
 
@@ -23,8 +22,7 @@ class FeatureServing:
         """Create online table based on feature table."""
 
         logger.info(
-            f"Creating online table {self.online_table_name}"
-            f"using {self.feature_table_name} as source table"
+            f"Creating online table {self.online_table_name}" f"using {self.feature_table_name} as source table"
         )
 
         spec = OnlineTableSpec(
@@ -50,19 +48,15 @@ class FeatureServing:
 
         self.fe.create_feature_spec(name=self.feature_spec_name, features=features)
 
-    def deploy_or_update_serving_endpoint(
-        self, workload_size: str = "Small", scale_to_zero: bool = True
-    ) -> None:
+    def deploy_or_update_serving_endpoint(self, workload_size: str = "Small", scale_to_zero: bool = True) -> None:
         """Deploy or update the serving endpoint.
-        
+
         Args:
             workload_size (str, optional): Workload size of the serving endpoint. \
                 Defaults to "Small".
             scale_to_zero (bool, optional): Enable scale to zero. Defaults to True.
         """
-        endpoint_exists = any(
-            item.name == self.endpoint_name for item in self.workspace.serving_endpoints.list()
-        )
+        endpoint_exists = any(item.name == self.endpoint_name for item in self.workspace.serving_endpoints.list())
 
         served_entities = [
             ServedEntityInput(
@@ -78,6 +72,4 @@ class FeatureServing:
                 config=EndpointCoreConfigInput(served_entities=served_entities),
             )
         else:
-            self.workspace.serving_endpoints.update_config(
-                name=self.endpoint_name, served_entities=served_entities
-            )
+            self.workspace.serving_endpoints.update_config(name=self.endpoint_name, served_entities=served_entities)
