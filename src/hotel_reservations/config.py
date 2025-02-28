@@ -1,15 +1,15 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import yaml
 from pydantic import BaseModel
 
 
 class ProjectConfig(BaseModel):
-    experiment_name: str
+    experiment_name: Optional[str]
+    experiment_name_fe: Optional[str]
     num_features: List[str]
     cat_features: List[str]
     target: str
-    drop_cols: List[str]
     catalog_name: str
     schema_name: str
     parameters: Dict[str, Any]  # Dictionary to hold model-related parameters
