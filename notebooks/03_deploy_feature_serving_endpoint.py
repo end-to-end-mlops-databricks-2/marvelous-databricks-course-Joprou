@@ -17,16 +17,13 @@ from hotel_reservations.config import ProjectConfig
 from hotel_reservations.serving.feature_serving import FeatureServing
 from hotel_reservations.utils import call_dbr_endpoint
 
-
 # COMMAND ----------
 spark = SparkSession.builder.config("spark.sql.session.timeZone", "UTC").getOrCreate()
 dbutils = DBUtils(spark)
 mlflow.set_tracking_uri("databricks")
 mlflow.set_registry_uri("databricks-uc")
 # COMMAND ----------
-os.environ["DBR_TOKEN"] = (
-    dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
-)
+os.environ["DBR_TOKEN"] = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
 os.environ["DBR_HOST"] = spark.conf.get("spark.databricks.workspaceUrl")
 
 # COMMAND ----------
@@ -43,9 +40,7 @@ test_set = spark.table(f"{catalog_schema}.test_set").toPandas()
 df = pd.concat([train_set, test_set])
 
 # load model
-model = mlflow.sklearn.load_model(
-    f"models:/{catalog_schema}.hotel_reservations_model_basic@latest-model"
-)
+model = mlflow.sklearn.load_model(f"models:/{catalog_schema}.hotel_reservations_model_basic@latest-model")
 
 # predict
 preds_df = df[["Booking_ID"]].copy()

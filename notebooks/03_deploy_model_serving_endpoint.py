@@ -22,9 +22,7 @@ dbutils = DBUtils(spark)
 mlflow.set_tracking_uri("databricks")
 mlflow.set_registry_uri("databricks-uc")
 # COMMAND ----------
-os.environ["DBR_TOKEN"] = (
-    dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
-)
+os.environ["DBR_TOKEN"] = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
 os.environ["DBR_HOST"] = spark.conf.get("spark.databricks.workspaceUrl")
 # COMMAND ----------
 # Loading config

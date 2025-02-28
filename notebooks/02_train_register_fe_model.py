@@ -9,8 +9,7 @@
 import mlflow
 from pyspark.sql import SparkSession
 
-from hotel_reservations.config import Tags, ProjectConfig
-
+from hotel_reservations.config import ProjectConfig, Tags
 from hotel_reservations.models.feature_lookup_model import FeatureLookUpModel
 
 # COMMAND ----------

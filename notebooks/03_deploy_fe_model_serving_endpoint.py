@@ -5,6 +5,7 @@
 # COMMAND ----------
 import os
 import time
+
 import mlflow
 from pyspark.dbutils import DBUtils
 from pyspark.sql import SparkSession
@@ -19,9 +20,7 @@ dbutils = DBUtils(spark)
 mlflow.set_tracking_uri("databricks")
 mlflow.set_registry_uri("databricks-uc")
 # COMMAND ----------
-os.environ["DBR_TOKEN"] = (
-    dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
-)
+os.environ["DBR_TOKEN"] = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
 os.environ["DBR_HOST"] = spark.conf.get("spark.databricks.workspaceUrl")
 
 
@@ -49,9 +48,7 @@ feature_lookup_server.deploy_or_update_serving_endpoint()
 train_set = spark.table(f"{catalog_schema}.train_set").limit(20)
 
 # Drop feature look-up columns and target column
-sample = train_set.drop(
-    "no_of_previous_cancellations", "no_of_special_requests", "update_timestamp_utc", config.target
-)
+sample = train_set.drop("no_of_previous_cancellations", "no_of_special_requests", "update_timestamp_utc", config.target)
 sample_records = sample.toPandas().to_dict(orient="records")
 dataframe_records = [[record] for record in sample_records]
 

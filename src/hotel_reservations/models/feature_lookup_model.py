@@ -5,13 +5,13 @@ from lightgbm import LGBMClassifier
 from loguru import logger
 from mlflow.models import infer_signature
 from mlflow.tracking import MlflowClient
-from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql import DataFrame, SparkSession
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from hotel_reservations.models._base import AbstractModel
 from hotel_reservations.config import ProjectConfig, Tags
+from hotel_reservations.models._base import AbstractModel
 
 
 class FeatureLookUpModel(AbstractModel):
@@ -50,14 +50,14 @@ class FeatureLookUpModel(AbstractModel):
         logger.info("Copy feature data from raw dataset into feature table")
         self.spark.sql(
             f"""
-        INSERT INTO {self.feature_table_name} SELECT BOOKING_ID, no_of_previous_cancellations, 
+        INSERT INTO {self.feature_table_name} SELECT BOOKING_ID, no_of_previous_cancellations,
         no_of_special_requests FROM {self.catalog_name}.{self.schema_name}.train_set
         """
         )
 
         self.spark.sql(
             f"""
-        INSERT INTO {self.feature_table_name} SELECT BOOKING_ID, no_of_previous_cancellations, 
+        INSERT INTO {self.feature_table_name} SELECT BOOKING_ID, no_of_previous_cancellations,
         no_of_special_requests FROM {self.catalog_name}.{self.schema_name}.test_set
         """
         )
@@ -68,15 +68,11 @@ class FeatureLookUpModel(AbstractModel):
         self.train_set = self.spark.table(f"{self.catalog_name}.{self.schema_name}.train_set").drop(
             "no_of_previous_cancellations", "no_of_special_requests"
         )
-        self.test_set = self.spark.table(
-            f"{self.catalog_name}.{self.schema_name}.test_set"
-        ).toPandas()
+        self.test_set = self.spark.table(f"{self.catalog_name}.{self.schema_name}.test_set").toPandas()
 
         # Need to cast type else it will throw error when coverting
         # spark dataframe into pandas dataframe
-        self.train_set = self.train_set.withColumn(
-            "Booking_ID", self.train_set["Booking_ID"].cast("string")
-        )
+        self.train_set = self.train_set.withColumn("Booking_ID", self.train_set["Booking_ID"].cast("string"))
 
     def feature_engineering(self):
         logger.info("Setting up feature engineering...")
@@ -160,9 +156,7 @@ class FeatureLookUpModel(AbstractModel):
         latest_version = registered_model.version
 
         client = MlflowClient()
-        client.set_registered_model_alias(
-            name=model_name, alias="latest-model", version=latest_version
-        )
+        client.set_registered_model_alias(name=model_name, alias="latest-model", version=latest_version)
 
     def load_latest_model_and_predict(self, df: DataFrame, result_type: str):
         model_uri = f"models:/{self.catalog_name}.{self.schema_name}.hotel_reservations_model_fe@latest-model"

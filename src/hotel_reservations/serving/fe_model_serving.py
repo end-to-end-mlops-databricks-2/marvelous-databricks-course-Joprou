@@ -1,6 +1,7 @@
 """Feature lookup serving module."""
 
 from databricks.sdk.service.catalog import OnlineTableSpec, OnlineTableSpecTriggeredSchedulingPolicy
+
 from hotel_reservations.serving.model_serving import ModelServing
 
 
