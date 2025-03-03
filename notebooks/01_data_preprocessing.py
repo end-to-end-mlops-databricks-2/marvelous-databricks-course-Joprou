@@ -1,4 +1,10 @@
 # Databricks notebook source
+# %pip install --ignore-installed hotel_reservations-0.0.1-py3-none-any.whl
+# dbutils.library.restartPython()
+
+# COMMAND ----------
+# %reload_ext autoreload
+# %autoreload 2
 
 import logging
 
@@ -12,7 +18,11 @@ from hotel_reservations.data_processor import DataProcessor
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-spark = SparkSession.builder.getOrCreate()
+spark = (
+    SparkSession.builder.config("spark.sql.session.timeZone", "UTC")
+    .config("spark.driver.memory", "12g")
+    .getOrCreate()
+)
 
 # COMMAND ----------
 
