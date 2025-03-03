@@ -1,5 +1,15 @@
-catalog_name: mlops_dev
-schema_name: changshe
+prd:
+  catalog_name: mlops_prod
+  schema_name: changshe
+  pipeline_id:
+acc:
+  catalog_name: mlops_acc
+  schema_name: changshe
+  pipeline_id:
+dev:
+  catalog_name: mlops_dev
+  schema_name: changshe
+  pipeline_id:
 experiment_name: /Shared/hotel_reservations_basic
 experiment_name_fe: /Shared/hotel-reservations-fe
 
