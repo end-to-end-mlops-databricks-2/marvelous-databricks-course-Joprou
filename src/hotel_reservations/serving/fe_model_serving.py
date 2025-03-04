@@ -1,5 +1,7 @@
 """Feature lookup serving module."""
 
+import time
+from loguru import logger
 from databricks.sdk.service.catalog import OnlineTableSpec, OnlineTableSpecTriggeredSchedulingPolicy
 
 from hotel_reservations.serving.model_serving import ModelServing
@@ -30,3 +32,29 @@ class FeatureLookupServing(ModelServing):
         )
 
         self.workspace.online_tables.create(name=self.feature_table_name_online, spec=spec)
+
+    def update_online_table(self, pipeline_id: str) -> None:
+        """Update online table with the pipeline."""
+        update_response = self.workspace.pipelines.start_update(
+            pipeline_id=pipeline_id, full_refresh=False
+        )
+
+        while True:
+            update_info = self.workspace.pipelines.get_update(
+                pipeline_id=pipeline_id, update_id=update_response.update_id
+            )
+            state = update_info.update.state
+
+            if state == "COMPLETED":
+                logger.info(f"Online table updated successfully with pipeline {pipeline_id}.")
+                break
+            if state in ["FAILED", "CANCELED"]:
+                msg = f"Online table update failed with pipeline {pipeline_id}."
+                logger.error(msg)
+                raise SystemError(msg)
+            if state == "WAITING_FOR_RESOURCES":
+                logger.warning("Waiting for resources to update online table.")
+            else:
+                logger.info(f"Online table update state: {state}")
+
+            time.sleep(30)
