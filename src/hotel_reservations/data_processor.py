@@ -70,7 +70,7 @@ def generate_unique_ids(
         if new_id not in existing_ids and new_id not in new_ids:
             new_ids.add(new_id)
 
-    return np.array(new_ids)
+    return np.array(list(new_ids))
 
 
 def generate_synthetic_data(df: pd.DataFrame, num_rows: int = 10) -> pd.DataFrame:
@@ -109,6 +109,25 @@ def generate_synthetic_data(df: pd.DataFrame, num_rows: int = 10) -> pd.DataFram
             output[col] = np.random.choice(df[col].unique(), num_rows)
 
     output[date_cols] = df[date_cols].sample(num_rows).reset_index(drop=True)
+
+    int_cols = [
+        "no_of_adults",
+        "no_of_children",
+        "no_of_weekend_nights",
+        "no_of_week_nights",
+        "required_car_parking_space",
+        "lead_time",
+        "arrival_year",
+        "arrival_month",
+        "arrival_date",
+        "repeated_guest",
+        "no_of_previous_cancellations",
+        "no_of_previous_bookings_not_canceled",
+        "no_of_special_requests",
+    ]
+
+    for col in int_cols:
+        output[col] = output[col].astype(np.int64)
 
     assert list(output.columns) == list(df.columns), "Column names do not match"
 
