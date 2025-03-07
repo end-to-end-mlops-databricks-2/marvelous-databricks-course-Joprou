@@ -275,6 +275,9 @@ class FeatureLookUpModel(AbstractModel):
         if f1_current < f1_latest:
             logger.info("Current model is worse than the latest registered model.")
             return False
+        if f1_current == f1_latest:
+            logger.info("Current model is as good as the latest registered model.")
+            return False
 
         logger.info("Current model is better than the latest registered model.")
         return True
