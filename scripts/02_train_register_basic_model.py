@@ -1,4 +1,5 @@
 import argparse
+
 import mlflow
 from loguru import logger
 from pyspark.dbutils import DBUtils
@@ -23,9 +24,7 @@ mlflow.set_registry_uri("databricks-uc")
 
 tags_dict = {"git_sha": args.git_sha, "branch": args.branch, "job_run_id": args.job_run_id}
 tags = Tags(**tags_dict)
-config = ProjectConfig.from_yaml(
-    config_path=f"{args.root_path}/files/project_config.yml", env=args.env
-)
+config = ProjectConfig.from_yaml(config_path=f"{args.root_path}/files/project_config.yml", env=args.env)
 
 # Initialize model
 basic_model = BasicModel(config=config, tags=tags, spark=spark)

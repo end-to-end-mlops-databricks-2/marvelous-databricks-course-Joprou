@@ -9,9 +9,7 @@ from hotel_reservations.config import ProjectConfig
 from hotel_reservations.data_processor import DataProcessor, generate_synthetic_data
 
 spark = (
-    SparkSession.builder.config("spark.sql.session.timeZone", "UTC")
-    .config("spark.driver.memory", "12g")
-    .getOrCreate()
+    SparkSession.builder.config("spark.sql.session.timeZone", "UTC").config("spark.driver.memory", "12g").getOrCreate()
 )
 
 parser = argparse.ArgumentParser()
@@ -20,9 +18,7 @@ parser.add_argument("--env", action="store", default=None, type=str, required=Tr
 args = parser.parse_args()
 
 
-config = ProjectConfig.from_yaml(
-    config_path=f"{args.root_path}/files/project_config.yml", env=args.env
-)
+config = ProjectConfig.from_yaml(config_path=f"{args.root_path}/files/project_config.yml", env=args.env)
 logger.info("Config loaded successfully.")
 logger.info(config)
 

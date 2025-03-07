@@ -33,7 +33,7 @@ class FeatureLookUpModel(AbstractModel):
         self.spark.sql(
             f"""
         CREATE OR REPLACE TABLE {self.feature_table_name}
-        (Booking_ID STRING NOT NULL, no_of_previous_cancellations LONG, 
+        (Booking_ID STRING NOT NULL, no_of_previous_cancellations LONG,
         no_of_special_requests LONG);
         """
         )
@@ -73,15 +73,11 @@ class FeatureLookUpModel(AbstractModel):
         self.train_set = self.spark.table(f"{self.catalog_name}.{self.schema_name}.train_set").drop(
             "no_of_previous_cancellations", "no_of_special_requests"
         )
-        self.test_set = self.spark.table(
-            f"{self.catalog_name}.{self.schema_name}.test_set"
-        ).toPandas()
+        self.test_set = self.spark.table(f"{self.catalog_name}.{self.schema_name}.test_set").toPandas()
 
         # Need to cast type else it will throw error when coverting
         # spark dataframe into pandas dataframe
-        self.train_set = self.train_set.withColumn(
-            "Booking_ID", self.train_set["Booking_ID"].cast("string")
-        )
+        self.train_set = self.train_set.withColumn("Booking_ID", self.train_set["Booking_ID"].cast("string"))
 
     def feature_engineering(self):
         """Setup feature engineering dataset."""
@@ -178,9 +174,7 @@ class FeatureLookUpModel(AbstractModel):
         latest_version = registered_model.version
 
         client = MlflowClient()
-        client.set_registered_model_alias(
-            name=model_name, alias="latest-model", version=latest_version
-        )
+        client.set_registered_model_alias(name=model_name, alias="latest-model", version=latest_version)
 
         return latest_version
 
@@ -195,10 +189,7 @@ class FeatureLookUpModel(AbstractModel):
         Returns:
             DataFrame: Predictions made by the model.
         """
-        model_uri = (
-            f"models:/{self.catalog_name}.{self.schema_name}."
-            "hotel_reservations_model_fe@latest-model"
-        )
+        model_uri = f"models:/{self.catalog_name}.{self.schema_name}." "hotel_reservations_model_fe@latest-model"
 
         predictions = self.fe.score_batch(model_uri=model_uri, df=df, result_type=result_type)
         return predictions
@@ -210,7 +201,7 @@ class FeatureLookUpModel(AbstractModel):
         query_base = """
         WITH max_timestamp AS (
             SELECT MAX(update_timestamp_utc) AS max_timestamp
-            FROM {catalog_name}.{schema_name}.{dataset_type}      
+            FROM {catalog_name}.{schema_name}.{dataset_type}
         )
         INSERT INTO {feature_table_name}
         SELECT BOOKING_ID, no_of_previous_cancellations, no_of_special_requests
@@ -255,9 +246,7 @@ class FeatureLookUpModel(AbstractModel):
         y_test = test_set.select(self.config.target).toPandas()[self.config.target]
 
         # predict using latest registered model
-        prediction_latest = self.load_latest_model_and_predict(
-            x_test, result_type="string"
-        ).toPandas()["prediction"]
+        prediction_latest = self.load_latest_model_and_predict(x_test, result_type="string").toPandas()["prediction"]
         metrics_latest = self.evaluate_model(prediction_latest, y_test)
         f1_latest = metrics_latest["f1"]
 

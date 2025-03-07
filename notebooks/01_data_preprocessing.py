@@ -19,9 +19,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 spark = (
-    SparkSession.builder.config("spark.sql.session.timeZone", "UTC")
-    .config("spark.driver.memory", "12g")
-    .getOrCreate()
+    SparkSession.builder.config("spark.sql.session.timeZone", "UTC").config("spark.driver.memory", "12g").getOrCreate()
 )
 
 # COMMAND ----------

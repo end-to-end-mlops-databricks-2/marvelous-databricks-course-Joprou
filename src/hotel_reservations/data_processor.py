@@ -1,6 +1,7 @@
 """Data processing module."""
 
 import random
+
 import numpy as np
 import pandas as pd
 from pyspark.sql import SparkSession
@@ -102,9 +103,7 @@ def generate_synthetic_data(df: pd.DataFrame, num_rows: int = 10) -> pd.DataFram
             output[col] = np.random.normal(df[col].mean(), df[col].std(), num_rows)
 
         elif isinstance(df[col], pd.CategoricalDtype) or pd.api.types.is_object_dtype(df[col]):
-            output[col] = np.random.choice(
-                df[col].unique(), num_rows, p=df[col].value_counts(normalize=True)
-            )
+            output[col] = np.random.choice(df[col].unique(), num_rows, p=df[col].value_counts(normalize=True))
         else:
             output[col] = np.random.choice(df[col].unique(), num_rows)
 

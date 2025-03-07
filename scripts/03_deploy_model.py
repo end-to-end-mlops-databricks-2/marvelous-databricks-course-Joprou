@@ -1,6 +1,4 @@
 import argparse
-import os
-import time
 
 from loguru import logger
 from pyspark.dbutils import DBUtils
@@ -8,16 +6,13 @@ from pyspark.sql import SparkSession
 
 from hotel_reservations.config import ProjectConfig
 from hotel_reservations.serving.fe_model_serving import FeatureLookupServing
-from hotel_reservations.utils import call_dbr_endpoint
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--root_path", action="store", default=None, type=str, required=True)
 parser.add_argument("--env", action="store", default=None, type=str, required=True)
 args = parser.parse_args()
 
-config = ProjectConfig.from_yaml(
-    config_path=f"{args.root_path}/files/project_config.yml", env=args.env
-)
+config = ProjectConfig.from_yaml(config_path=f"{args.root_path}/files/project_config.yml", env=args.env)
 logger.info("Config loaded successfully.")
 catalog_schema = f"{config.catalog_name}.{config.schema_name}"
 ENDPOINT_NAME = f"hotel-reservations-model-serving-fe-{args.env}"

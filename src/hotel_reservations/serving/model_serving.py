@@ -21,9 +21,7 @@ class ModelServing:
             str: Latest version of the model.
         """
         client = mlflow.MlflowClient()
-        latest_version = client.get_model_version_by_alias(
-            self.model_name, alias="latest-model"
-        ).version
+        latest_version = client.get_model_version_by_alias(self.model_name, alias="latest-model").version
         logger.info(f"Latest version of the `{self.model_name} model: {latest_version}")
         return latest_version
 
@@ -55,9 +53,7 @@ class ModelServing:
             )
         ]
 
-        endpoint_exists = any(
-            item.name == self.endpoint_name for item in self.workspace.serving_endpoints.list()
-        )
+        endpoint_exists = any(item.name == self.endpoint_name for item in self.workspace.serving_endpoints.list())
 
         if not endpoint_exists:
             logger.info(f"Creating a new serving endpoint: {self.endpoint_name}")

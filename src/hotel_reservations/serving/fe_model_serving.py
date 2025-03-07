@@ -1,10 +1,10 @@
 """Feature lookup serving module."""
 
 import time
-from loguru import logger
 
 from databricks.sdk.service.catalog import OnlineTableSpec, OnlineTableSpecTriggeredSchedulingPolicy
 from databricks.sdk.service.pipelines import UpdateInfoState
+from loguru import logger
 
 from hotel_reservations.serving.model_serving import ModelServing
 
@@ -37,9 +37,7 @@ class FeatureLookupServing(ModelServing):
 
     def update_online_table(self, pipeline_id: str) -> None:
         """Update online table with the pipeline."""
-        update_response = self.workspace.pipelines.start_update(
-            pipeline_id=pipeline_id, full_refresh=False
-        )
+        update_response = self.workspace.pipelines.start_update(pipeline_id=pipeline_id, full_refresh=False)
 
         while True:
             update_info = self.workspace.pipelines.get_update(

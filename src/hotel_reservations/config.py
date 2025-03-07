@@ -26,9 +26,7 @@ class ProjectConfig(BaseModel):
             config_dict = yaml.safe_load(f)
 
         # update config based on specified env
-        env_catalog_config = {
-            i: config_dict[env][i] for i in ["catalog_name", "schema_name", "pipeline_id"]
-        }
+        env_catalog_config = {i: config_dict[env][i] for i in ["catalog_name", "schema_name", "pipeline_id"]}
         config_dict.update(env_catalog_config)
 
         return cls(**config_dict)

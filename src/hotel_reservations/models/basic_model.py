@@ -7,7 +7,7 @@ from lightgbm import LGBMClassifier
 from loguru import logger
 from mlflow import MlflowClient
 from mlflow.models import infer_signature
-from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql import DataFrame, SparkSession
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -29,9 +29,7 @@ class BasicModel(AbstractModel):
         logger.info("Loading data from Databricks...")
         self.train_set_spark = self.spark.table(f"{self.catalog_name}.{self.schema_name}.train_set")
         self.train_set = self.train_set_spark.toPandas()
-        self.test_set = self.spark.table(
-            f"{self.catalog_name}.{self.schema_name}.test_set"
-        ).toPandas()
+        self.test_set = self.spark.table(f"{self.catalog_name}.{self.schema_name}.test_set").toPandas()
         self.data_version = "0"
 
         self.X_train = self.train_set[self.config.num_features + self.config.cat_features]
@@ -122,9 +120,7 @@ class BasicModel(AbstractModel):
         logger.info(f"Model registered as version {latest_version}.")
 
         client = MlflowClient()
-        client.set_registered_model_alias(
-            name=uc_model_name, alias="latest-model", version=latest_version
-        )
+        client.set_registered_model_alias(name=uc_model_name, alias="latest-model", version=latest_version)
 
         logger.info(f"`latest-model` tag is added to model version {latest_version}.")
 
