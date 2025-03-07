@@ -19,7 +19,7 @@ mlflow.set_registry_uri("databricks-uc")
 
 # COMMAND ----------
 
-tags_dict = {"git_sha": "abcd12345", "branch": "week2"}
+tags_dict = {"git_sha": "abcd12345", "branch": "week2", "job_run_id": "abcd1234"}
 tags = Tags(**tags_dict)
 config = ProjectConfig.from_yaml("../project_config.yml")
 

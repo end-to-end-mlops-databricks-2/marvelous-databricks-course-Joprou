@@ -44,7 +44,11 @@ fe_model.feature_engineering()
 # Train model
 fe_model.train()
 
-test_set = spark.table(f"{config.catalog_name}.{config.schema_name}.test_set").limit(100)
+test_set = (
+    spark.table(f"{config.catalog_name}.{config.schema_name}.test_set")
+    .drop("no_of_previous_cancellations", "no_of_special_requests")
+    .limit(100)
+)
 
 if fe_model.is_model_improves(test_set):
     logger.info("Model improved. Registering new model.")

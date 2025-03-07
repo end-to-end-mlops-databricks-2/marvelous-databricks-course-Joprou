@@ -33,7 +33,8 @@ class FeatureLookUpModel(AbstractModel):
         self.spark.sql(
             f"""
         CREATE OR REPLACE TABLE {self.feature_table_name}
-        (Booking_ID STRING NOT NULL, no_of_previous_cancellations INT, no_of_special_requests INT);
+        (Booking_ID STRING NOT NULL, no_of_previous_cancellations LONG, 
+        no_of_special_requests LONG);
         """
         )
 
@@ -139,6 +140,7 @@ class FeatureLookUpModel(AbstractModel):
         with mlflow.start_run(tags=self.tags) as run:
             self.run_id = run.info.run_id
             pipeline.fit(self.x_train, self.y_train)
+            logger.info("Model trained successfully.")
             y_pred = pipeline.predict(self.x_test)
 
             self._log_metrics(self.evaluate_model(y_pred, self.y_test))
@@ -155,6 +157,8 @@ class FeatureLookUpModel(AbstractModel):
                 training_set=self.training_set,
                 signature=signature,
             )
+
+            logger.info("Model logged successfully.")
 
     def register_model(self) -> int:
         """Register the trained model and set an alias to the latest version.'
@@ -246,7 +250,9 @@ class FeatureLookUpModel(AbstractModel):
         """
 
         x_test = test_set.drop(self.config.target)
-        y_test = test_set[self.config.target]
+
+        # convert y_true to pandas Series for evaluation
+        y_test = test_set.select(self.config.target).toPandas()[self.config.target]
 
         # predict using latest registered model
         prediction_latest = self.load_latest_model_and_predict(
