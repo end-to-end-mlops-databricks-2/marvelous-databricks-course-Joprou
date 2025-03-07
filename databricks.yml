@@ -27,8 +27,8 @@ variables:
 
 resources:
   jobs:
-    hotel-reservations:
-      name: hotel-reservations-workflow-test
+    hotel-reservations-basic:
+      name: hotel-reservations-workflow-basic-test
       schedule:
         quartz_cron_expression: "0 0 0/3 1/1 * ? *"
         timezone_id: Asia/Kuala_Lumpur
@@ -62,7 +62,7 @@ resources:
           depends_on:
             - task_key: "preprocessing"
           spark_python_task:
-            python_file: "scripts/02_train_register_fe_model.py"
+            python_file: "scripts/02_train_register_basic_model.py"
             parameters:
               - "--root_path"
               - ${workspace.root_path}
@@ -89,7 +89,7 @@ resources:
               outcome: "true"
           job_cluster_key: ${var.project_cluster}
           spark_python_task:
-            python_file: "scripts/03_deploy_model.py"
+            python_file: "scripts/03_deploy_basic_model.py"
             parameters:
               - "--root_path"
               - ${workspace.root_path}
