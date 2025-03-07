@@ -2,7 +2,9 @@
 
 import time
 from loguru import logger
+
 from databricks.sdk.service.catalog import OnlineTableSpec, OnlineTableSpecTriggeredSchedulingPolicy
+from databricks.sdk.service.pipelines import UpdateInfoState
 
 from hotel_reservations.serving.model_serving import ModelServing
 
@@ -45,16 +47,16 @@ class FeatureLookupServing(ModelServing):
             )
             state = update_info.update.state
 
-            if state == "COMPLETED":
+            if state == UpdateInfoState.COMPLETED:
                 logger.info(f"Online table updated successfully with pipeline {pipeline_id}.")
                 break
-            if state in ["FAILED", "CANCELED"]:
+            if state in [UpdateInfoState.FAILED, UpdateInfoState.CANCELED]:
                 msg = f"Online table update failed with pipeline {pipeline_id}."
                 logger.error(msg)
                 raise SystemError(msg)
-            if state == "WAITING_FOR_RESOURCES":
+            if state == UpdateInfoState.WAITING_FOR_RESOURCES:
                 logger.warning("Waiting for resources to update online table.")
             else:
-                logger.info(f"Online table update state: {state}")
+                logger.info(f"Online table update state: {state.value}")
 
             time.sleep(30)
