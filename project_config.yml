@@ -9,9 +9,9 @@ acc:
 dev:
   catalog_name: mlops_dev
   schema_name: changshe
-  pipeline_id:
-experiment_name: /Shared/hotel_reservations_basic
-experiment_name_fe: /Shared/hotel-reservations-fe
+  pipeline_id: e1b0b0a5-f06e-4752-bc40-2b1dc77f47fb
+experiment_name: /Shared/hotel-reservations-basic-victor
+experiment_name_fe: /Shared/hotel-reservations-fe-victor
 
 parameters:
   learning_rate: 0.01

@@ -5,15 +5,120 @@
 bundle:
   name: marvelous-databricks-course-Joprou
 
+artifacts:
+  default:
+    type: whl
+    build: uv build
+    path: .
+
+variables:
+  git_sha:
+    description: git_sha
+    default: abcd
+  branch:
+    description: branch
+    default: main
+  schedule_pause_status:
+    description: schedule pause status
+    default: UNPAUSED
+  project_cluster:
+    description: project cluster
+    default: hotel-reservations-cluster
+
+resources:
+  jobs:
+    hotel-reservations:
+      name: hotel-reservations-workflow-test
+      schedule:
+        quartz_cron_expression: "0 0 0/3 1/1 * ? *"
+        timezone_id: Asia/Kuala_Lumpur
+        pause_status : ${var.schedule_pause_status}
+      tags:
+        project_name: hotel-reservations
+      job_clusters:
+        - job_cluster_key: ${var.project_cluster}
+          new_cluster:
+            spark_version: "15.4.x-scala2.12"
+            data_security_mode: "SINGLE_USER"
+            node_type_id: "r3.xlarge"
+            driver_node_type_id: "r3.xlarge"
+            autoscale:
+              min_workers: 1
+              max_workers: 1
+      tasks:
+        - task_key: "preprocessing"
+          job_cluster_key: ${var.project_cluster}
+          spark_python_task:
+            python_file: "scripts/01_process_data.py"
+            parameters:
+              - "--root_path"
+              - ${workspace.root_path}
+              - "--env"
+              - ${bundle.target}
+          libraries:
+            - whl: ./dist/*.whl
+        - task_key: "train_model"
+          job_cluster_key: ${var.project_cluster}
+          depends_on:
+            - task_key: "preprocessing"
+          spark_python_task:
+            python_file: "scripts/02_train_register_fe_model.py"
+            parameters:
+              - "--root_path"
+              - ${workspace.root_path}
+              - "--env"
+              - ${bundle.target}
+              - "--git_sha"
+              - ${var.git_sha}
+              - "--job_run_id"
+              - "{{job.id}}"
+              - "--branch"
+              - ${var.branch}
+          libraries:
+            - whl: ./dist/*.whl
+        - task_key: model_updated
+          condition_task:
+            op: EQUAL_TO
+            left: "{{tasks.train_model.values.model_updated}}"
+            right: "1"
+          depends_on:
+            - task_key: "train_model"
+        - task_key: "deploy_model"
+          depends_on:
+            - task_key: "model_updated"
+              outcome: "true"
+          job_cluster_key: ${var.project_cluster}
+          spark_python_task:
+            python_file: "scripts/03_deploy_model.py"
+            parameters:
+              - "--root_path"
+              - ${workspace.root_path}
+              - "--env"
+              - ${bundle.target}
+          libraries:
+            - whl: ./dist/*.whl
+
 targets:
   dev:
+    cluster_id: 0203-092735-7kzv141g
     mode: development
     default: true
     workspace:
       host: https://dbc-4894232b-9fc5.cloud.databricks.com
-
-  ## Optionally, there could be 'staging' or 'prod' targets here.
-  #
-  # prod:
-  #   workspace:
-  #     host: https://dbc-4894232b-9fc5.cloud.databricks.com
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.target}/${bundle.name}
+    variables:
+      schedule_pause_status: UNPAUSED
+  
+  acc:
+    workspace:
+      host: https://dbc-4894232b-9fc5.cloud.databricks.com
+      root_path: /Shared/.bundl/${bundle.target}/${bundle.name}
+    variables:
+      schedule_pause_status: UNPAUSED
+  
+  prd:
+    workspace:
+      host: https://dbc-4894232b-9fc5.cloud.databricks.com
+      root_path: /Shared/.bundl/${bundle.target}/${bundle.name}
+    variables:
+      schedule_pause_status: UNPAPAUSED
