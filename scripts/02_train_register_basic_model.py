@@ -35,7 +35,7 @@ basic_model.prepare_model_pipeline()
 basic_model.train_model()
 basic_model.log_model()
 
-test_set = spark.table(f"{config.catalog_name}.{config.schema_name}.test_set").limit(100)
+test_set = spark.table(f"{config.catalog_name}.{config.schema_name}.test_set")
 
 if basic_model.is_model_improves(test_set):
     logger.info("Model improved. Registering new model.")

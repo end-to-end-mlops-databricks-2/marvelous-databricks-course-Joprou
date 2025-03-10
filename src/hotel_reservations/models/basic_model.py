@@ -139,8 +139,8 @@ class BasicModel(AbstractModel):
         Returns:
             np.array: Predictions.
         """
-        logger.info("Loading model...")
         model_uri = f"models:/{self.catalog_name}.{self.schema_name}.{model_name}@latest-model"
+        logger.info(f"Loading model from URI: {model_uri}...")
         model = mlflow.sklearn.load_model(model_uri)
         logger.info("Model loaded succesfully.")
 
@@ -161,16 +161,24 @@ class BasicModel(AbstractModel):
         y_test = test_set[self.config.target]
 
         # predict using latest registered model
+        logger.info("=" * 20)
+        logger.info("Predicting using the latest registered model...")
         prediction_latest = self.load_latest_model_and_predict(x_test)
         metrics_latest = self.evaluate_model(prediction_latest, y_test)
         f1_latest = metrics_latest["f1"]
+        logger.info("=" * 20)
 
-        # predict using current trained model
+        # predict using current trained
+        logger.info("=" * 20)
+        logger.info("Predicting using the current model...")
         current_model_uri = f"runs:/{self.run_id}/lightgbm-pipeline-model"
+        logger.info(f"Loading model from URI: {current_model_uri}...")
         model = mlflow.sklearn.load_model(current_model_uri)
+        logger.info("Model loaded succesfully.")
         prediction_current = model.predict(x_test)
         metrics_current = self.evaluate_model(prediction_current, y_test)
         f1_current = metrics_current["f1"]
+        logger.info("=" * 20)
 
         logger.info(f"F1 score of latest model: {f1_latest}")
         logger.info(f"F1 score of current model: {f1_current}")
