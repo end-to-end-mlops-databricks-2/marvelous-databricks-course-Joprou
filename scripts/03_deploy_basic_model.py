@@ -22,7 +22,7 @@ dbutils = DBUtils(spark)
 model_version = dbutils.jobs.taskValues.get(taskKey="train_model", key="model_version")
 
 model_server = ModelServing(
-    model_name=f"{CATALOG_SCHEMA}.hotel_reservations_model",
+    model_name=f"{CATALOG_SCHEMA}.hotel_reservations_model_basic",
     endpoint_name=ENDPOINT_NAME,
 )
 
