@@ -41,6 +41,7 @@ class ModelServing:
             logger.info("Deploying the latest version of the model")
             entity_version = self.get_latest_model_version()
         else:
+            logger.info(f"Deploying the model version: {version}")
             entity_version = version
 
         served_entities = [
@@ -66,3 +67,4 @@ class ModelServing:
                 name=self.endpoint_name,
                 served_entities=served_entities,
             )
+        logger.info(f"Endpoint `{self.endpoint_name}` deployed successfully.")
