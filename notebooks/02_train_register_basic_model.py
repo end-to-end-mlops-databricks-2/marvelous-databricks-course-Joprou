@@ -18,7 +18,7 @@ mlflow.set_registry_uri("databricks-uc")
 # COMMAND ----------
 config = ProjectConfig.from_yaml("../project_config.yml")
 spark = SparkSession.builder.config("spark.sql.session.timeZone", "UTC").getOrCreate()
-tags = Tags(**{"git_sha": "abcd12345", "branch": "week2"})
+tags = Tags(**{"git_sha": "abcd12345", "branch": "week2", "job_run_id": "a1b2"})
 # COMMAND ----------
 basic_model = BasicModel(config=config, tags=tags, spark=spark)
 # COMMAND ----------
