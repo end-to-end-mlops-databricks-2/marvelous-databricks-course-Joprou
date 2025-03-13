@@ -189,7 +189,7 @@ def create_or_refresh_monitoring_table(
     )
 
     logger.info(f"Writing to monitoring table: {monitoring_table_name}...")
-    df_final_with_status.write.format("delta").mode("overwrite").saveAsTable(monitoring_table_name)
+    df_final_with_status.write.mode("append").saveAsTable(monitoring_table_name)
 
     try:
         workspace.quality_monitors.get(monitoring_table_name)
