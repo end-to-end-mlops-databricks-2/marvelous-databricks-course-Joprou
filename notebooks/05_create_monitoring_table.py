@@ -11,6 +11,7 @@
 # %autoreload 2
 from databricks.sdk import WorkspaceClient
 from pyspark.sql import SparkSession
+
 from hotel_reservations.config import ProjectConfig
 from hotel_reservations.monitoring import create_or_refresh_monitoring_table
 

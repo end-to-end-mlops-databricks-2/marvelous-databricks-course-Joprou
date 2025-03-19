@@ -4,14 +4,15 @@ from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors import NotFound
 from databricks.sdk.service.catalog import MonitorInferenceLog, MonitorInferenceLogProblemType
 from loguru import logger
-from pyspark.sql import SparkSession, functions as func
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as func
 from pyspark.sql.types import (
-    StructType,
-    StructField,
-    StringType,
-    LongType,
-    DoubleType,
     ArrayType,
+    DoubleType,
+    LongType,
+    StringType,
+    StructField,
+    StructType,
 )
 
 
@@ -47,10 +48,7 @@ def create_monitoring_table(
         ),
     )
 
-    spark.sql(
-        f"ALTER TABLE {monitoring_table_name} "
-        "SET TBLPROPERTIES (delta.enableChangeDataFeed = true)"
-    )
+    spark.sql(f"ALTER TABLE {monitoring_table_name} " "SET TBLPROPERTIES (delta.enableChangeDataFeed = true)")
 
     logger.info(f"Monitoring table created: {monitoring_table_name}.")
 
@@ -131,9 +129,7 @@ def create_or_refresh_monitoring_table(
         func.from_json(func.col("response"), response_schema),
     )
 
-    df_exploded = inf_table_parsed.withColumn(
-        "record", func.explode(func.col("parsed_request.dataframe_records"))
-    )
+    df_exploded = inf_table_parsed.withColumn("record", func.explode(func.col("parsed_request.dataframe_records")))
 
     # COMMAND ----------
     df_final = df_exploded.select(
@@ -156,9 +152,7 @@ def create_or_refresh_monitoring_table(
         func.col("record.market_segment_type").alias("market_segment_type"),
         func.col("record.repeated_guest").alias("repeated_guest"),
         func.col("record.no_of_previous_cancellations").alias("no_of_previous_cancellations"),
-        func.col("record.no_of_previous_bookings_not_canceled").alias(
-            "no_of_previous_bookings_not_canceled"
-        ),
+        func.col("record.no_of_previous_bookings_not_canceled").alias("no_of_previous_bookings_not_canceled"),
         func.col("record.avg_price_per_room").alias("avg_price_per_room"),
         func.col("record.no_of_special_requests").alias("no_of_special_requests"),
         func.col("parsed_response.predictions")[0].alias("prediction"),
@@ -171,18 +165,16 @@ def create_or_refresh_monitoring_table(
     df_final_with_status = (
         df_final.join(test_set.select("Booking_ID", "booking_status"), on="Booking_ID", how="left")
         .withColumnRenamed("booking_status", "booking_status_test")
-        .join(
-            inference_set_skewed.select("Booking_ID", "booking_status"), on="Booking_ID", how="left"
-        )
+        .join(inference_set_skewed.select("Booking_ID", "booking_status"), on="Booking_ID", how="left")
         .withColumnRenamed("booking_status", "booking_status_inference")
     )
 
     df_final_with_status = (
         df_final_with_status.select(
             "*",
-            func.coalesce(
-                func.col("booking_status_test"), func.col("booking_status_inference")
-            ).alias("booking_status"),
+            func.coalesce(func.col("booking_status_test"), func.col("booking_status_inference")).alias(
+                "booking_status"
+            ),
         )
         .drop("booking_status_test", "booking_status_inference")
         .dropna(subset=["booking_status", "prediction"])
