@@ -1,7 +1,9 @@
 import argparse
+
 from databricks.sdk import WorkspaceClient
 from loguru import logger
 from pyspark.sql import SparkSession
+
 from hotel_reservations.config import ProjectConfig
 from hotel_reservations.monitoring import create_or_refresh_monitoring_table
 
@@ -10,9 +12,7 @@ parser.add_argument("--root_path", action="store", default=None, type=str, requi
 parser.add_argument("--env", action="store", default=None, type=str, required=True)
 args = parser.parse_args()
 
-config = ProjectConfig.from_yaml(
-    config_path=f"{args.root_path}/files/project_config.yml", env=args.env
-)
+config = ProjectConfig.from_yaml(config_path=f"{args.root_path}/files/project_config.yml", env=args.env)
 logger.info("Config loaded successfully.")
 CATALOG_SCHEMA = f"{config.catalog_name}.{config.schema_name}"
 

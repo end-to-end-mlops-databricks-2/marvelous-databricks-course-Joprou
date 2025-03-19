@@ -5,9 +5,11 @@
 
 # COMMAND ----------
 import time
+
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service import sql
 from pyspark.sql import SparkSession
+
 from hotel_reservations.config import ProjectConfig
 
 spark = SparkSession.builder.config("spark.sql.session.timeZone", "UTC").getOrCreate()
@@ -24,9 +26,9 @@ ALERT_METRIC = "f1_score.weighted"
 
 # COMMAND ----------
 ALERT_QUERY = f"""
-SELECT 
-  (COUNT(CASE WHEN {ALERT_METRIC} < 0.8 THEN 1 END) * 100.0 / 
-   COUNT(CASE WHEN {ALERT_METRIC} IS NOT NULL AND NOT isnan({ALERT_METRIC}) THEN 1 END)) 
+SELECT
+  (COUNT(CASE WHEN {ALERT_METRIC} < 0.8 THEN 1 END) * 100.0 /
+   COUNT(CASE WHEN {ALERT_METRIC} IS NOT NULL AND NOT isnan({ALERT_METRIC}) THEN 1 END))
    AS {ALERT_OPERAND_COL}
 FROM {CATALOG_SCHEMA}.hotel_reservations_monitoring_profile_metrics;
 
